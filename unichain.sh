@@ -114,7 +114,7 @@ uni_setup() {
 
     # Check the status to confirm the rules are added
     if sudo ufw status | grep -q "8548"; then
-        print_info "Port 8546 allowed in the firewall."
+        print_info "Port 8548 allowed in the firewall."
     else
         print_error "Failed to allow port 8546."
         exit 1
@@ -162,7 +162,7 @@ uni_run() {
     # Check the latest block
     print_info "Checking the latest block..."
     response=$(curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' \
-    -H "Content-Type: application/json" http://localhost:8546)
+    -H "Content-Type: application/json" http://localhost:8548)
 
     if [[ $response == *"\"error\":"* ]]; then
         print_error "Failed to retrieve the latest block. Check if the UniChain node is running correctly."
