@@ -203,7 +203,7 @@ uni_menu() {
             uni_run
             ;;
         4) 
-            priv-key
+            priv_key
             ;;
         *)
             print_error "Invalid choice. Please enter 1 or 4 : "
