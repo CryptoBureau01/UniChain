@@ -90,8 +90,36 @@ uni_setup() {
     # Call the uni_menu function to display the menu
     uni_menu
 
-
 }
+
+
+
+
+# Function to run UniChain and check the node
+uni_run() {
+    print_info "Setting port 8546 for UniChain..."
+    # Start UniChain on port 8546 using Docker Compose
+    docker-compose up -d
+
+    # Wait for a few seconds to ensure the node is running
+    sleep 5
+
+    # Check latest block
+    print_info "Checking latest block..."
+    response=$(curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' \
+    -H "Content-Type: application/json" http://localhost:8546)
+
+    if [[ $response == *"\"error\":"* ]]; then
+        print_error "Failed to retrieve the latest block. Check if the UniChain node is running correctly."
+    else
+        print_info "Successfully retrieved the latest block information."
+    fi
+
+    # Call the uni_menu function to display the menu
+    uni_menu
+}
+
+
 
 
 
@@ -103,6 +131,7 @@ uni_menu() {
     print_info ""
     print_info "1. Install-Dependency"
     print_info "2. Setup-UniChain"
+    print_info "3. Uni-Node-Run"
     print_info ""
     print_info "==============================="
     
@@ -114,6 +143,9 @@ uni_menu() {
             ;;
         2)
             uni_setup
+            ;;
+        3) 
+            uni_run
             ;;
         *)
             print_error "Invalid choice. Please enter 1 or 2."
