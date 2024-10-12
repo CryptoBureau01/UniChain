@@ -97,15 +97,27 @@ uni_setup() {
 
 # Function to run UniChain and check the node
 uni_run() {
+    print_info "Navigating to UniChain node directory..."
+    
+    # Navigate to the unichain-node directory
+    cd /root/unichain-node || {
+        print_error "Failed to navigate to /root/unichain-node. Check if the directory exists."
+        return
+    }
+
     print_info "Setting port 8546 for UniChain..."
+    
     # Start UniChain on port 8546 using Docker Compose
-    docker-compose up -d
+    docker-compose up -d || {
+        print_error "Failed to start UniChain. Check Docker configuration."
+        return
+    }
 
     # Wait for a few seconds to ensure the node is running
     sleep 5
 
-    # Check latest block
-    print_info "Checking latest block..."
+    # Check the latest block
+    print_info "Checking the latest block..."
     response=$(curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' \
     -H "Content-Type: application/json" http://localhost:8546)
 
@@ -118,6 +130,7 @@ uni_run() {
     # Call the uni_menu function to display the menu
     uni_menu
 }
+
 
 
 
