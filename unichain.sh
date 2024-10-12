@@ -14,6 +14,7 @@ print_error() {
 
 # Function to install dependencies
 install_dependency() {
+    print_info "<=========== Install Dependency ==============>"
     print_info "Updating and upgrading system packages, and installing curl..."
     sudo apt update && sudo apt upgrade -y && sudo apt install curl -y
 
@@ -64,6 +65,7 @@ install_dependency() {
 
 # Function to setup UniChain
 uni_setup() {
+    print_info "<=========== UniChain Setup ==============>"
     # Check if the 'unichain-node' directory exists
     if [ -d "unichain-node" ]; then
         print_info "UniChain node folder already exists. Navigating to the directory..."
@@ -116,6 +118,7 @@ uni_setup() {
 
 # Function to run UniChain and check the node
 uni_run() {
+    print_info "<=========== UniChain Node Run ==============>"
     print_info "Navigating to UniChain node directory..."
     
     # Navigate to the unichain-node directory
@@ -155,6 +158,7 @@ uni_run() {
 
 # Function to display the private key
 priv_key() {
+    print_info "<=========== Check Private key ==============>"
     print_info "Fetching the private key from the node..."
 
     # Define the path to the nodekey file
@@ -177,6 +181,8 @@ priv_key() {
 
 # Function to stop UniChain
 uni_stop() {
+
+    print_info "<=========== UniChain Node Stop ==============>"
     print_info "Stopping the UniChain node..."
     
     # Navigate to the UniChain node directory
@@ -201,6 +207,7 @@ uni_stop() {
 
 # Function to start UniChain
 uni_start() {
+    print_info "<=========== UniChain Node Start ==============>"
     print_info "Starting the UniChain node..."
 
     # Navigate to the UniChain node directory
@@ -221,7 +228,44 @@ uni_start() {
 
 
 
+# Function to display Op-Node logs
+op_node_logs() {
+    print_info "<=========== UniChain Op Node Logs ==============>"
+    print_info "Fetching logs for the UniChain-Op-Node..."
+    
+    # Fetch the Docker logs for the Op-Node container
+    docker logs unichain-node-op-node-1
 
+    if [ $? -eq 0 ]; then
+        print_info "Displayed Op-Node logs successfully."
+    else
+        print_error "Failed to fetch Op-Node logs. Make sure the container is running."
+    fi
+
+    # Optionally, return to the menu after showing the logs
+    uni_menu
+}
+
+
+
+
+# Function to display Client-Node logs
+client_node_logs() {
+    print_info "<=========== UniChain Client Node Logs ==============>"
+    print_info "Fetching logs for the UniChain Client-Node..."
+
+    # Fetch the Docker logs for the Client-Node container
+    docker logs unichain-node-execution-client-1
+
+    if [ $? -eq 0 ]; then
+        print_info "Displayed Client-Node logs successfully."
+    else
+        print_error "Failed to fetch Client-Node logs. Make sure the container is running."
+    fi
+
+    # Optionally, return to the menu after showing the logs
+    uni_menu
+}
 
 
 
@@ -229,7 +273,7 @@ uni_start() {
 # Function to display menu and prompt user for input
 uni_menu() {
     print_info "==============================="
-    print_info "         UniChain Menu         "
+    print_info "    UniChain Node Tool Menu    "
     print_info "==============================="
     print_info ""
     print_info "1. Install-Dependency"
@@ -238,8 +282,14 @@ uni_menu() {
     print_info "4. Check-Private-Key"
     print_info "5. Stop-Node"
     print_info "6. Start-Node"
+    print_info "7. Op-Node-Logs"
+    print_info "8. Client-Node-Logs"
+    print_info "9. Exit"
     print_info ""
     print_info "==============================="
+    print_info " Created By : CryptoBuroMaster "
+    print_info "==============================="
+    print_info ""
     
     read -p "Enter your choice (1 or 9): " user_choice
 
@@ -261,6 +311,15 @@ uni_menu() {
             ;;
         6) 
             uni_start
+            ;;
+        7) 
+            op_node_logs
+            ;;
+        8)
+            client_node_logs
+            ;;
+        9)
+            exit 0  # Exit the script after breaking the loop
             ;;
         *)
             print_error "Invalid choice. Please enter 1 or 9 : "
