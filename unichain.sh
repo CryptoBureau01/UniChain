@@ -153,6 +153,28 @@ uni_run() {
 
 
 
+# Function to display the private key
+priv_key() {
+    print_info "Fetching the private key from the node..."
+
+    # Define the path to the nodekey file
+    nodekey_file="/root/unichain-node/geth-data/geth/nodekey"
+
+    # Check if the nodekey file exists
+    if [ -f "$nodekey_file" ]; then
+        # Read and display the private key
+        private_key=$(cat "$nodekey_file")
+        print_info "Private Key: $private_key"
+    else
+        print_error "Node key file not found. Please ensure the file exists at $nodekey_file."
+    fi
+
+    # Optionally return to the menu after displaying the key
+    uni_menu
+}
+
+
+
 
 
 # Function to display menu and prompt user for input
