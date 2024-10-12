@@ -175,6 +175,55 @@ priv_key() {
 
 
 
+# Function to stop UniChain
+uni_stop() {
+    print_info "Stopping the UniChain node..."
+    
+    # Navigate to the UniChain node directory
+    cd /root/unichain-node || { print_error "Failed to navigate to UniChain directory."; return 1; }
+
+    # Stop the Docker containers
+    docker-compose down
+    
+    if [ $? -eq 0 ]; then
+        print_info "UniChain node stopped successfully."
+    else
+        print_error "Failed to stop the UniChain node."
+    fi
+
+    # Optionally, return to the menu after stopping the node
+    uni_menu
+}
+
+
+
+
+
+# Function to start UniChain
+uni_start() {
+    print_info "Starting the UniChain node..."
+
+    # Navigate to the UniChain node directory
+    cd /root/unichain-node || { print_error "Failed to navigate to UniChain directory."; return 1; }
+
+    # Start the Docker containers
+    docker-compose up -d
+    
+    if [ $? -eq 0 ]; then
+        print_info "UniChain node started successfully."
+    else
+        print_error "Failed to start the UniChain node."
+    fi
+
+    # Optionally, return to the menu after starting the node
+    uni_menu
+}
+
+
+
+
+
+
 
 
 # Function to display menu and prompt user for input
@@ -187,10 +236,12 @@ uni_menu() {
     print_info "2. Setup-UniChain"
     print_info "3. Uni-Node-Run"
     print_info "4. Check-Private-Key"
+    print_info "5. Stop-Node"
+    print_info "6. Start-Node"
     print_info ""
     print_info "==============================="
     
-    read -p "Enter your choice (1 or 2): " user_choice
+    read -p "Enter your choice (1 or 9): " user_choice
 
     case $user_choice in
         1)
@@ -205,8 +256,14 @@ uni_menu() {
         4) 
             priv_key
             ;;
+        5)
+            uni_stop
+            ;;
+        6) 
+            uni_start
+            ;;
         *)
-            print_error "Invalid choice. Please enter 1 or 4 : "
+            print_error "Invalid choice. Please enter 1 or 9 : "
             ;;
     esac
 }
