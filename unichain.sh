@@ -100,10 +100,12 @@ uni_setup() {
     print_info "Allowing necessary ports in the firewall..."
 
     # Allow port 8548
-    sudo ufw allow 8548
+    sudo ufw allow 8548/tcp
+    sudo ufw allow 8548/udp
 
     # Allow port 30304
-    sudo ufw allow 30304
+    sudo ufw allow 30304/tcp
+    sudo ufw allow 30304/udp
 
     # Update docker-compose.yml to change port 30303 to 30304
     sed -i 's|30303:30303|30304:30303|' docker-compose.yml
