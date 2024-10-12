@@ -206,7 +206,7 @@ uni_menu() {
             priv-key
             ;;
         *)
-            print_error "Invalid choice. Please enter 1 or 2."
+            print_error "Invalid choice. Please enter 1 or 4 : "
             ;;
     esac
 }
