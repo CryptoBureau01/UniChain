@@ -14,16 +14,37 @@ print_error() {
 
 # Function to install dependencies
 install_dependency() {
-    print_info "Updating and upgrading system packages..."
+    print_info "Updating and upgrading system packages, and installing curl..."
     sudo apt update && sudo apt upgrade -y && sudo apt install curl -y
 
-    print_info "Installing Docker..."
-    sudo apt install docker.io -y
+    # Check if Docker is already installed
+    if ! command -v docker &> /dev/null; then
+        print_info "Docker is not installed. Installing Docker..."
+        sudo apt install docker.io -y
 
-    print_info "Installing Docker Compose..."
-    sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    sudo chmod +x /usr/local/bin/docker-compose
+        # Check for installation errors
+        if [ $? -ne 0 ]; then
+            print_error "Failed to install Docker. Please check your system for issues."
+            exit 1
+        fi
+    else
+        print_info "Docker is already installed."
+    fi
 
+    # Check if Docker Compose is already installed
+    if ! command -v docker-compose &> /dev/null; then
+        print_info "Installing Docker Compose..."
+        sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+
+        # Check for installation errors
+        if [ $? -ne 0 ]; then
+            print_error "Failed to install Docker Compose. Please check your system for issues."
+            exit 1
+        fi
+    else
+        print_info "Docker Compose is already installed."
+    fi
 
     # Print Docker and Docker Compose versions to confirm installation
     print_info "Checking Docker version..."
@@ -32,13 +53,13 @@ install_dependency() {
     print_info "Checking Docker Compose version..."
     docker-compose --version
 
-    
     # Call the uni_menu function to display the menu
     uni_menu
-    
 }
 
-
+    
+    
+    
 
 
 # Function to setup UniChain
