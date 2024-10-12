@@ -64,11 +64,17 @@ install_dependency() {
 
 # Function to setup UniChain
 uni_setup() {
-    print_info "Cloning UniChain repository and entering the directory..."
-    git clone https://github.com/Uniswap/unichain-node && cd unichain-node
-    if [ $? -ne 0 ]; then
-        print_error "Failed to clone or enter UniChain repository."
-        exit 1
+    # Check if the 'unichain-node' directory exists
+    if [ -d "unichain-node" ]; then
+        print_info "UniChain node folder already exists. Navigating to the directory..."
+        cd unichain-node
+    else
+        print_info "Cloning UniChain repository and entering the directory..."
+        git clone https://github.com/Uniswap/unichain-node && cd unichain-node
+        if [ $? -ne 0 ]; then
+            print_error "Failed to clone or enter UniChain repository."
+            exit 1
+        fi
     fi
 
     print_info "Editing .env.sepolia file..."
