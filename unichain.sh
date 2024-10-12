@@ -94,7 +94,40 @@ uni_setup() {
         exit 1
     fi
 
- 
+
+    print_info "Updating Docker Compose ports to avoid conflict on port 30303..."
+    
+    print_info "Allowing necessary ports in the firewall..."
+
+    # Allow port 8546
+    sudo ufw allow 8546
+
+    # Allow port 30304
+    sudo ufw allow 30304
+
+    # Update docker-compose.yml to change port 30303 to 30304
+    sed -i 's|30303:30303|30304:30303|' docker-compose.yml
+
+    # Update docker-compose.yml to change port 8545 to 8546
+    sed -i 's|8545:8545|8546:8545|' docker-compose.yml
+
+
+    # Check the status to confirm the rules are added
+    if sudo ufw status | grep -q "8546"; then
+        print_info "Port 8546 allowed in the firewall."
+    else
+        print_error "Failed to allow port 8546."
+        exit 1
+    fi
+
+    if sudo ufw status | grep -q "30304"; then
+        print_info "Port 30304 allowed in the firewall."
+    else
+        print_error "Failed to allow port 30304."
+        exit 1
+    fi
+
+    
 
     # Call the uni_menu function to display the menu
     uni_menu
@@ -129,7 +162,7 @@ uni_run() {
     # Check the latest block
     print_info "Checking the latest block..."
     response=$(curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' \
-    -H "Content-Type: application/json" http://localhost:8545)
+    -H "Content-Type: application/json" http://localhost:8546)
 
     if [[ $response == *"\"error\":"* ]]; then
         print_error "Failed to retrieve the latest block. Check if the UniChain node is running correctly."
