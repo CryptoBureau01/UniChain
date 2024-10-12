@@ -186,6 +186,7 @@ uni_menu() {
     print_info "1. Install-Dependency"
     print_info "2. Setup-UniChain"
     print_info "3. Uni-Node-Run"
+    print_info "4. Check-Private-Key"
     print_info ""
     print_info "==============================="
     
@@ -200,6 +201,9 @@ uni_menu() {
             ;;
         3) 
             uni_run
+            ;;
+        4) 
+            priv-key
             ;;
         *)
             print_error "Invalid choice. Please enter 1 or 2."
