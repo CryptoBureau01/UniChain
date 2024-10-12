@@ -86,6 +86,19 @@ uni_setup() {
         exit 1
     fi
 
+    print_info "Updating Docker Compose ports to avoid conflict on port 30303..."
+    
+    # Update docker-compose.yml to change port 30303 to 30304
+    sed -i 's|30303:30303|30304:30303|' docker-compose.yml
+
+    # Confirm changes were made
+    if grep -q "30304:30303" docker-compose.yml; then
+        print_info "Docker Compose ports updated successfully!"
+    else
+        print_error "Failed to update Docker Compose ports."
+        exit 1
+    fi
+
 
     # Call the uni_menu function to display the menu
     uni_menu
