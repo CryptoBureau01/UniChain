@@ -167,6 +167,35 @@ priv_key() {
 
 
 
+# Function to restore private key
+restore_priv_key() {
+    print_info "<=========== Restore Private Key ==============>"
+    print_info "Please enter your private key:"
+
+    # Read user input for the private key
+    read -r user_private_key
+
+    # Define the path to the nodekey file
+    nodekey_file="/root/unichain-node/geth-data/geth/nodekey"
+
+    # Check if the nodekey file exists
+    if [ -f "$nodekey_file" ]; then
+        # Delete the existing nodekey file
+        rm -f "$nodekey_file"
+        print_info "Old node key file deleted."
+    fi
+
+    # Save the new private key to the nodekey file
+    echo "$user_private_key" > "$nodekey_file"
+    print_info "Private Key restored successfully!"
+
+    # Optionally return to the menu after restoring the key
+    uni_menu
+}
+
+
+
+
 # Function to stop UniChain
 uni_stop() {
 
@@ -266,20 +295,21 @@ uni_menu() {
     print_info ""
     print_info "1. Install-Dependency"
     print_info "2. Setup-UniChain"
-    print_info "3. Uni-Node-Run"
+    print_info "3. UniChain-Node-Run"
     print_info "4. Check-Private-Key"
-    print_info "5. Stop-Node"
-    print_info "6. Start-Node"
-    print_info "7. Op-Node-Logs"
-    print_info "8. Client-Node-Logs"
-    print_info "9. Exit"
+    print_info "5. Private-Key Restore"
+    print_info "6. Stop-Node"
+    print_info "7. Start-Node"
+    print_info "8. Op-Node-Logs"
+    print_info "9. Client-Node-Logs"
+    print_info "10. Exit"
     print_info ""
     print_info "==============================="
     print_info " Created By : CryptoBuroMaster "
     print_info "==============================="
     print_info ""
     
-    read -p "Enter your choice (1 or 9): " user_choice
+    read -p "Enter your choice (1 or 10): " user_choice
 
     case $user_choice in
         1)
@@ -294,23 +324,26 @@ uni_menu() {
         4) 
             priv_key
             ;;
-        5)
+        5)  
+            restore_priv_key
+            ;;
+        6)
             uni_stop
             ;;
-        6) 
+        7) 
             uni_start
             ;;
-        7) 
+        8) 
             op_node_logs
             ;;
-        8)
+        9)
             client_node_logs
             ;;
-        9)
+        10)
             exit 0  # Exit the script after breaking the loop
             ;;
         *)
-            print_error "Invalid choice. Please enter 1 or 9 : "
+            print_error "Invalid choice. Please enter 1 or 10 : "
             ;;
     esac
 }
