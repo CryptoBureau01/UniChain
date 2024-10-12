@@ -100,7 +100,7 @@ uni_setup() {
     print_info "Allowing necessary ports in the firewall..."
 
     # Allow port 8546
-    sudo ufw allow 8546
+    sudo ufw allow 8548
 
     # Allow port 30304
     sudo ufw allow 30304
@@ -108,12 +108,12 @@ uni_setup() {
     # Update docker-compose.yml to change port 30303 to 30304
     sed -i 's|30303:30303|30304:30303|' docker-compose.yml
 
-    # Update docker-compose.yml to change port 8545 to 8546
-    sed -i 's|8545:8545|8546:8545|' docker-compose.yml
+    # Update docker-compose.yml to change port 8545 to 8548
+    sed -i 's|8545:8545|8548:8545|' docker-compose.yml
 
 
     # Check the status to confirm the rules are added
-    if sudo ufw status | grep -q "8546"; then
+    if sudo ufw status | grep -q "8548"; then
         print_info "Port 8546 allowed in the firewall."
     else
         print_error "Failed to allow port 8546."
@@ -150,7 +150,7 @@ uni_run() {
 
     print_info "Setting port 8546 for UniChain..."
     
-    # Start UniChain on port 8546 using Docker Compose
+    # Start UniChain on port 8548 using Docker Compose
     docker-compose up -d || {
         print_error "Failed to start UniChain. Check Docker configuration."
         return
