@@ -99,7 +99,7 @@ uni_setup() {
     
     print_info "Allowing necessary ports in the firewall..."
 
-    # Allow port 8546
+    # Allow port 8548
     sudo ufw allow 8548
 
     # Allow port 30304
