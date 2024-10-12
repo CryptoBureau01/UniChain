@@ -10,10 +10,12 @@ print_error() {
     echo -e "\e[31m[ERROR] $1\e[0m"
 }
 
+
+
 # Function to install dependencies
 install_dependency() {
     print_info "Updating and upgrading system packages..."
-    sudo apt update && sudo apt upgrade -y
+    sudo apt update && sudo apt upgrade -y && sudo apt install curl -y
 
     print_info "Installing Docker..."
     sudo apt install docker.io -y
@@ -21,7 +23,23 @@ install_dependency() {
     print_info "Installing Docker Compose..."
     sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     sudo chmod +x /usr/local/bin/docker-compose
+
+
+    # Print Docker and Docker Compose versions to confirm installation
+    print_info "Checking Docker version..."
+    docker --version
+
+    print_info "Checking Docker Compose version..."
+    docker-compose --version
+
+    
+    # Call the uni_menu function to display the menu
+    uni_menu
+    
 }
+
+
+
 
 # Function to setup UniChain
 uni_setup() {
@@ -46,18 +64,26 @@ uni_setup() {
         print_error "Failed to update .env.sepolia file."
         exit 1
     fi
+
+
+    # Call the uni_menu function to display the menu
+    uni_menu
+
+
 }
 
 
 
 # Function to display menu and prompt user for input
 uni_menu() {
-    echo "==============================="
-    echo "         UniChain Menu          "
-    echo "==============================="
-    echo "1. Install-Dependency"
-    echo "2. Setup-UniChain"
-    echo "==============================="
+    print_info "==============================="
+    print_info "         UniChain Menu         "
+    print_info "==============================="
+    print_info ""
+    print_info "1. Install-Dependency"
+    print_info "2. Setup-UniChain"
+    print_info ""
+    print_info "==============================="
     
     read -p "Enter your choice (1 or 2): " user_choice
 
@@ -77,8 +103,4 @@ uni_menu() {
 # Call the uni_menu function to display the menu
 uni_menu
 
-
-# Call the functions
-install_dependency
-uni_setup
 
