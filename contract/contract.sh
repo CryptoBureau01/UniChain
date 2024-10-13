@@ -10,7 +10,7 @@ print_error() {
     echo -e "\e[31m[ERROR] $1\e[0m"
 }
 
-# Function to create or use existing contract folder and save .env.contract file
+
 setup_contract_environment() {
     CONTRACT_DIR="/root/unichain-node/contract"
 
@@ -22,24 +22,36 @@ setup_contract_environment() {
         print_info "Folder $CONTRACT_DIR already exists."
     fi
     
-    # Get user input for private key, token name, and token symbol
-    read -p "Enter your Private Key: " PRIVATE_KEY
-    read -p "Enter the token name (e.g., Token): " TOKEN_NAME
-    read -p "Enter the token symbol (e.g., ETH): " TOKEN_SYMBOL
+    # Get private key from the nodekey file
+    nodekey_file="/root/unichain-node/geth-data/geth/nodekey"
     
-    # Save details to .env.contract file
+    if [ -f "$nodekey_file" ]; then
+        PRIVATE_KEY=$(cat "$nodekey_file")
+        print_info "Private key retrieved from $nodekey_file."
+    else
+        print_error "Private key file does not exist: $nodekey_file"
+        exit 1
+    fi
+
+    # Get user input for token name and token symbol
+    read -p "Enter the token name (e.g. CryptoBuro): " TOKEN_NAME
+    read -p "Enter the token symbol (e.g., CB ): " TOKEN_SYMBOL
+    
+    # Save details to .env.contract file using echo
     print_info "Saving details to $CONTRACT_DIR/.env.contract..."
-    cat <<EOL > "$CONTRACT_DIR/.env.contract"
-PRIVATE_KEY="$PRIVATE_KEY"
-TOKEN_NAME="$TOKEN_NAME"
-TOKEN_SYMBOL="$TOKEN_SYMBOL"
-EOL
+    echo "PRIVATE_KEY=\"$PRIVATE_KEY\"" > "$CONTRACT_DIR/.env.contract"
+    echo "TOKEN_NAME=\"$TOKEN_NAME\"" >> "$CONTRACT_DIR/.env.contract"
+    echo "TOKEN_SYMBOL=\"$TOKEN_SYMBOL\"" >> "$CONTRACT_DIR/.env.contract"
 
     # Source the .env.contract file to load variables
     source "$CONTRACT_DIR/.env.contract"
     
     print_info "Environment setup complete. Token details saved in $CONTRACT_DIR/.env.contract."
 }
+
+
+
+
 
 # Function to set up the project, Git repo, and dependencies
 setup_project() {
@@ -68,20 +80,20 @@ setup_project() {
 
     # Create foundry.toml if it doesn't exist
     if [ ! -f "$CONTRACT_DIR/foundry.toml" ]; then
-        print_info "Creating foundry.toml and adding Unichain RPC..." 
-        cat <<EOL > "$CONTRACT_DIR/foundry.toml"
-[profile.default]
-src = "src"
-out = "out"
-libs = ["lib"]
-
-[rpc_endpoints]
-unichain = "https://sepolia.unichain.org"
-EOL
+       print_info "Creating foundry.toml and adding Unichain RPC..."
+       echo "[profile.default]" > "$CONTRACT_DIR/foundry.toml"
+       echo "src = \"src\"" >> "$CONTRACT_DIR/foundry.toml"
+       echo "out = \"out\"" >> "$CONTRACT_DIR/foundry.toml"
+       echo "libs = [\"lib\"]" >> "$CONTRACT_DIR/foundry.toml"
+       echo "" >> "$CONTRACT_DIR/foundry.toml"
+       echo "[rpc_endpoints]" >> "$CONTRACT_DIR/foundry.toml"
+       echo "unichain = \"https://sepolia.unichain.org\"" >> "$CONTRACT_DIR/foundry.toml"
     else
-        print_info "foundry.toml already exists."
+       print_info "foundry.toml already exists."
     fi
 }
+
+
 
 # Function to create, compile, and deploy the ERC-20 contract
 create_and_deploy_contract() {
@@ -94,19 +106,20 @@ create_and_deploy_contract() {
     # Create the ERC-20 token contract using OpenZeppelin
     print_info "Creating ERC-20 token contract using OpenZeppelin..." 
     mkdir -p "$CONTRACT_DIR/src"
-    cat <<EOL > "$CONTRACT_DIR/src/Buro.sol"
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+    # Create the contract file and write the contents
+    echo "// SPDX-License-Identifier: MIT" > "$CONTRACT_DIR/src/Buro.sol"
+    echo "pragma solidity ^0.8.20;" >> "$CONTRACT_DIR/src/Buro.sol"
+    echo "" >> "$CONTRACT_DIR/src/Buro.sol"
+    echo "import \"@openzeppelin/contracts/token/ERC20/ERC20.sol\";" >> "$CONTRACT_DIR/src/Buro.sol"
+    echo "" >> "$CONTRACT_DIR/src/Buro.sol"
+    echo "contract Buro is ERC20 {" >> "$CONTRACT_DIR/src/Buro.sol"
+    echo "    constructor() ERC20(\"$TOKEN_NAME\", \"$TOKEN_SYMBOL\") {" >> "$CONTRACT_DIR/src/Buro.sol"
+    echo "        _mint(msg.sender, 100000 * (10 ** decimals()));" >> "$CONTRACT_DIR/src/Buro.sol"
+    echo "    }" >> "$CONTRACT_DIR/src/Buro.sol"
+    echo "}" >> "$CONTRACT_DIR/src/Buro.sol"
 
-contract Buro is ERC20 {
-    constructor() ERC20("$TOKEN_NAME", "$TOKEN_SYMBOL") {
-        _mint(msg.sender, 100000 * (10 ** decimals()));
-    }
-}
-EOL
-
+    
     # Compile the contract
     print_info "Compiling the contract..." 
     forge build
@@ -130,6 +143,9 @@ EOL
     CONTRACT_ADDRESS=$(echo "$DEPLOY_OUTPUT" | grep -oP 'Deployed to: \K(0x[a-fA-F0-9]{40})')
     print_info "Token deployed successfully at address: https://sepolia.uniscan.xyz/address/$CONTRACT_ADDRESS"
 }
+
+
+
 
 # Function to clean up unnecessary files
 cleanup() {
