@@ -284,16 +284,16 @@ uni_start() {
 contract() {
     print_info "<================= Contract Deploy ================>"
 
-    sudo mkdir -p /root/unichain-node/contract
-    CONTRACT_DIR="/root/unichain-node/contract"
     
-    rm -f /root/unichain-node/contract/contract.sh
-    rm -f /root/unichain-node/contract/contract.sh.1
+    CONTRACT_DIR="/root/unichain-node"
+    
+    rm -f /root/unichain-node/contract.sh
+    rm -f /root/unichain-node/contract.sh.1
 
     
     # Download the contract setup script
     print_info "Downloading contract setup script..."
-    wget -O "$CONTRACT_DIR/contract-setup.sh" https://raw.githubusercontent.com/CryptoBuroMaster/UniChain/main/contract/contract.sh && chomd +x contract.sh && ./contract.sh
+    cd "$CONTRACT_DIR" wget -O "$CONTRACT_DIR/contract.sh" https://raw.githubusercontent.com/CryptoBuroMaster/UniChain/main/contract/contract.sh && chomd +x contract.sh && ./contract.sh
 
     print_info "Contract Deploy successfully!"
 
