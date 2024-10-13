@@ -16,7 +16,7 @@ print_error() {
 install_dependency() {
     print_info "<=========== Install Dependency ==============>"
     print_info "Updating and upgrading system packages, and installing curl..."
-    sudo apt update && sudo apt upgrade -y && sudo apt install curl -y
+    sudo apt update && sudo apt upgrade -y && sudo apt install curl -y 
 
     # Check if Docker is already installed
     if ! command -v docker &> /dev/null; then
@@ -47,6 +47,9 @@ install_dependency() {
         print_info "Docker Compose is already installed."
     fi
 
+    # Geth install
+    sudo apt install ethereum
+    
     # Print Docker and Docker Compose versions to confirm installation
     print_info "Checking Docker version..."
     docker --version
@@ -102,6 +105,10 @@ uni_setup() {
     # Allow port 8548
     sudo ufw allow 8548/tcp
     sudo ufw allow 8548/udp
+    sudo ufw allow 8546/tcp
+    sudo ufw allow 8546/udp
+    sudo ufw allow 8549/udp
+    sudo ufw allow 8549/tcp
 
     # Allow port 30304
     sudo ufw allow 30304/tcp
