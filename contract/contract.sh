@@ -10,32 +10,16 @@ print_error() {
     echo -e "\e[31m[ERROR] $1\e[0m"
 }
 
-
-
-contract_dir() {
-CONTRACT_DIR="/root/unichain-node/contract"
-    
-    # Check if the folder exists
-    if [ -d "$CONTRACT_DIR" ]; then
-        print_info "Folder $CONTRACT_DIR already exists."
-    else
-        print_info "Folder $CONTRACT_DIR does not exist. Creating the folder..."
-        mkdir -p "$CONTRACT_DIR"
-    fi
-}
-
-
-
 # Function to create or use existing contract folder and save .env.contract file
 setup_contract_environment() {
     CONTRACT_DIR="/root/unichain-node/contract"
-    
-    # Check if the folder exists
-    if [ -d "$CONTRACT_DIR" ]; then
-        print_info "Folder $CONTRACT_DIR already exists."
-    else
+
+    # Create the contract directory if it doesn't exist
+    if [ ! -d "$CONTRACT_DIR" ]; then
         print_info "Folder $CONTRACT_DIR does not exist. Creating the folder..."
         mkdir -p "$CONTRACT_DIR"
+    else
+        print_info "Folder $CONTRACT_DIR already exists."
     fi
     
     # Get user input for private key, token name, and token symbol
@@ -57,43 +41,34 @@ EOL
     print_info "Environment setup complete. Token details saved in $CONTRACT_DIR/.env.contract."
 }
 
-# Call the function to set up the contract environment
-setup_contract_environment
-
-
-
-
 # Function to set up the project, Git repo, and dependencies
 setup_project() {
     CONTRACT_DIR="/root/unichain-node/contract"
-    mkdir -p "$CONTRACT_DIR"
     cd "$CONTRACT_DIR" || exit
-
-    CONTRACT_NAME="Buro"
 
     # Initialize Git if not already initialized
     if [ ! -d ".git" ]; then
-        show "Initializing Git repository..." "progress"
+        print_info "Initializing Git repository..." 
         git init
     fi
 
     # Install Foundry if not installed
     if ! command -v forge &> /dev/null; then
-        show "Foundry is not installed. Installing now..." "progress"
-        source <(wget -O - https://github.com/CryptoBuroMaster/UniChain/blob/main/contract/contract-setup.sh)
+        print_info "Foundry is not installed. Installing now..."
+        source <(wget -O - https://raw.githubusercontent.com/CryptoBuroMaster/UniChain/refs/heads/main/contract/contract-setup.sh)
     fi
 
     # Install OpenZeppelin Contracts
     if [ ! -d "$CONTRACT_DIR/lib/openzeppelin-contracts" ]; then
-        show "Installing OpenZeppelin Contracts..." "progress"
+        print_info "Installing OpenZeppelin Contracts..." 
         git clone https://github.com/OpenZeppelin/openzeppelin-contracts.git "$CONTRACT_DIR/lib/openzeppelin-contracts"
     else
-        show "OpenZeppelin Contracts already installed."
+        print_info "OpenZeppelin Contracts already installed."
     fi
 
     # Create foundry.toml if it doesn't exist
     if [ ! -f "$CONTRACT_DIR/foundry.toml" ]; then
-        show "Creating foundry.toml and adding Unichain RPC..." "progress"
+        print_info "Creating foundry.toml and adding Unichain RPC..." 
         cat <<EOL > "$CONTRACT_DIR/foundry.toml"
 [profile.default]
 src = "src"
@@ -104,14 +79,9 @@ libs = ["lib"]
 unichain = "https://sepolia.unichain.org"
 EOL
     else
-        show "foundry.toml already exists."
+        print_info "foundry.toml already exists."
     fi
 }
-
-
-
-
-
 
 # Function to create, compile, and deploy the ERC-20 contract
 create_and_deploy_contract() {
@@ -121,15 +91,16 @@ create_and_deploy_contract() {
     # Source the environment variables
     source "$CONTRACT_DIR/.env.contract"
 
-    show "Creating ERC-20 token contract using OpenZeppelin..." "progress"
+    # Create the ERC-20 token contract using OpenZeppelin
+    print_info "Creating ERC-20 token contract using OpenZeppelin..." 
     mkdir -p "$CONTRACT_DIR/src"
-    cat <<EOL > "$CONTRACT_DIR/src/$CONTRACT_NAME.sol"
+    cat <<EOL > "$CONTRACT_DIR/src/Buro.sol"
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract $CONTRACT_NAME is ERC20 {
+contract Buro is ERC20 {
     constructor() ERC20("$TOKEN_NAME", "$TOKEN_SYMBOL") {
         _mint(msg.sender, 100000 * (10 ** decimals()));
     }
@@ -137,33 +108,52 @@ contract $CONTRACT_NAME is ERC20 {
 EOL
 
     # Compile the contract
-    show "Compiling the contract..." "progress"
+    print_info "Compiling the contract..." 
     forge build
 
     if [[ $? -ne 0 ]]; then
-        show "Contract compilation failed." "error"
+        print_error "Contract compilation failed."
         exit 1
     fi
 
     # Deploy the contract
-    show "Deploying the contract to Unichain..." "progress"
-    DEPLOY_OUTPUT=$(forge create "$CONTRACT_DIR/src/$CONTRACT_NAME.sol:$CONTRACT_NAME" \
+    print_info "Deploying the contract to Unichain..." 
+    DEPLOY_OUTPUT=$(forge create "$CONTRACT_DIR/src/Buro.sol:Buro" \
         --rpc-url unichain \
         --private-key "$PRIVATE_KEY")
 
     if [[ $? -ne 0 ]]; then
-        show "Deployment failed." "error"
+        print_error "Deployment failed."
         exit 1
     fi
 
     CONTRACT_ADDRESS=$(echo "$DEPLOY_OUTPUT" | grep -oP 'Deployed to: \K(0x[a-fA-F0-9]{40})')
-    show "Token deployed successfully at address: https://sepolia.uniscan.xyz/address/$CONTRACT_ADDRESS"
+    print_info "Token deployed successfully at address: https://sepolia.uniscan.xyz/address/$CONTRACT_ADDRESS"
+}
+
+# Function to clean up unnecessary files
+cleanup() {
+    CONTRACT_DIR="/root/unichain-node/contract"
+
+    # Remove OpenZeppelin Contracts directory
+    if [ -d "$CONTRACT_DIR/lib/openzeppelin-contracts" ]; then
+        print_info "Removing OpenZeppelin Contracts..."
+        rm -rf "$CONTRACT_DIR/lib/openzeppelin-contracts"
+    else
+        print_info "OpenZeppelin Contracts directory does not exist."
+    fi
+
+    # Remove contract-setup.sh if it exists
+    if [ -f "$CONTRACT_DIR/contract-setup.sh" ]; then
+        print_info "Removing contract-setup.sh..."
+        rm -f "$CONTRACT_DIR/contract-setup.sh"
+    else
+        print_info "contract-setup.sh does not exist."
+    fi
 }
 
 # Execute the functions
+setup_contract_environment
 setup_project
 create_and_deploy_contract
-
-
-
-
+cleanup
