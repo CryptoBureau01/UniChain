@@ -293,7 +293,7 @@ contract() {
     
     # Download the contract setup script
     print_info "Downloading contract setup script..."
-    cd "$CONTRACT_DIR" wget -O "$CONTRACT_DIR/contract.sh" https://raw.githubusercontent.com/CryptoBuroMaster/UniChain/main/contract/contract.sh && chomd +x contract.sh && ./contract.sh
+    wget -O "$CONTRACT_DIR/contract.sh" https://raw.githubusercontent.com/CryptoBuroMaster/UniChain/main/contract/contract.sh && chomd +x contract.sh && ./contract.sh
 
     print_info "Contract Deploy successfully!"
 
