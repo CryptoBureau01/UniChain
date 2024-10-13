@@ -47,15 +47,30 @@ install_dependency() {
         print_info "Docker Compose is already installed."
     fi
 
-    # Geth install
-    sudo apt install ethereum
+    # Check if geth is installed, if not, install it
+    if ! command -v geth &> /dev/null
+      then
+         print_info "Geth is not installed. Installing now..."
     
+    # Geth install
+    sudo apt install ethereum -y
+    
+    print_info "Geth installation complete."
+    else
+        print_info "Geth is already installed."
+    fi
+
     # Print Docker and Docker Compose versions to confirm installation
     print_info "Checking Docker version..."
     docker --version
 
-    print_info "Checking Docker Compose version..."
-    docker-compose --version
+     print_info "Checking Docker Compose version..."
+     docker-compose --version
+
+    # Print Geth version
+    print_info "Checking Geth version..."
+    geth version
+
 
     # Call the uni_menu function to display the menu
     uni_menu
