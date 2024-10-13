@@ -284,8 +284,8 @@ uni_start() {
 contract() {
     print_info "<================= Contract Deploy ================>"
     
-    rm -f /root/unichain-node/contract.sh
-    rm -f /root/unichain-node/contract.sh.1
+    rm -f /root/contract.sh
+    rm -f /root/contract.sh.1
 
     
     # Download the contract setup script
