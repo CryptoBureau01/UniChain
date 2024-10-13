@@ -280,6 +280,28 @@ uni_start() {
 
 
 
+#Cintract Deploy Function 
+contract() {
+    print_info "<================= Contract Deploy ================>"
+
+   
+    rm -f /root/unichain-node/contract/contract.sh
+    rm -f /root/unichain-node/contract/contract.sh.1
+
+    sudo mkdir -p /root/unichain-node/contract
+    
+    print_info "Contract deploy Start...."
+    cd /root/unichain-node/contract && wget https://raw.githubusercontent.com/CryptoBuroMaster/UniChain/blob/main/contract/contract.sh && chmod +x contract.sh && ./contract.sh
+
+    print_info "Contract Deploy successfully!"
+
+    
+    # Optionally, return to the menu after showing the Contract deploy 
+    uni_menu
+}
+
+
+
 # Function to display Op-Node logs
 op_node_logs() {
     print_info "<=========== UniChain Op Node Logs ==============>"
@@ -335,16 +357,17 @@ uni_menu() {
     print_info "5. Private-Key Restore"
     print_info "6. Stop-Node"
     print_info "7. Start-Node"
-    print_info "8. Op-Node-Logs"
-    print_info "9. Client-Node-Logs"
-    print_info "10. Exit"
+    print_info "8. Contract-Deploy"
+    print_info "9. Op-Node-Logs"
+    print_info "10. Client-Node-Logs"
+    print_info "11. Exit"
     print_info ""
     print_info "==============================="
     print_info " Created By : CryptoBuroMaster "
     print_info "==============================="
     print_info ""
     
-    read -p "Enter your choice (1 or 10): " user_choice
+    read -p "Enter your choice (1 or 11): " user_choice
 
     case $user_choice in
         1)
@@ -369,16 +392,19 @@ uni_menu() {
             uni_start
             ;;
         8) 
+            contract
+            ;;
+        9) 
             op_node_logs
             ;;
-        9)
+        10)
             client_node_logs
             ;;
-        10)
+        11)
             exit 0  # Exit the script after breaking the loop
             ;;
         *)
-            print_error "Invalid choice. Please enter 1 or 10 : "
+            print_error "Invalid choice. Please enter 1 or 11 : "
             ;;
     esac
 }
