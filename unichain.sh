@@ -287,17 +287,24 @@ contract() {
     rm -f /root/contract.sh
     rm -f /root/contract.sh.1
 
-    
     # Download the contract setup script
     print_info "Downloading contract setup script..."
-    curl -L https://raw.githubusercontent.com/CryptoBuroMaster/UniChain/main/contract/contract.sh && chmod +x contract.sh && ./contract.sh
+    curl -L -o /root/contract.sh https://raw.githubusercontent.com/CryptoBuroMaster/UniChain/main/contract/contract.sh
+
+    # Check if the download was successful
+    if [[ $? -ne 0 ]]; then
+        print_info "Failed to download contract.sh"
+        return 1  # Exit the function with an error
+    fi
+
+    chmod +x /root/contract.sh && /root/contract.sh
 
     print_info "Contract Deploy successfully!"
 
-    
     # Optionally, return to the menu after showing the Contract deploy 
     uni_menu
 }
+
 
 
 
