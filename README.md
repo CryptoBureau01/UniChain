@@ -10,7 +10,7 @@
 
 
 
-**Follow our TG : https://t.me/CryptoBuroOfficial**
+**Follow our TG : https://t.me/CryptoBureau01**
 
 ## Tool Installation Command
 
@@ -20,7 +20,7 @@ To install the necessary tools for managing your UniChain node, run the followin
 
 ```bash
 
-cd $HOME && wget https://raw.githubusercontent.com/CryptoBuroMaster/UniChain/main/unichain.sh && chmod +x unichain.sh && ./unichain.sh
+cd $HOME && wget https://raw.githubusercontent.com/CryptoBureau01/UniChain/main/unichain.sh && chmod +x unichain.sh && ./unichain.sh
 ```
 
 
