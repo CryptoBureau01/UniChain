@@ -67,7 +67,7 @@ setup_project() {
     # Install Foundry if not installed
     if ! command -v forge &> /dev/null; then
         print_info "Foundry is not installed. Installing now..."
-        source <(wget -O - https://raw.githubusercontent.com/CryptoBuroMaster/UniChain/refs/heads/main/contract/contract-setup.sh)
+        source <(wget -O - https://raw.githubusercontent.com/CryptoBureau01/UniChain/refs/heads/main/contract/contract-setup.sh)
     fi
 
     # Install OpenZeppelin Contracts
