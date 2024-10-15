@@ -1,5 +1,8 @@
 #!/bin/bash
 
+curl -s https://raw.githubusercontent.com/CryptoBureau01/logo/main/logo.sh | bash
+sleep 5
+
 # Function to print info messages
 print_info() {
     echo -e "\e[32m[INFO] $1\e[0m"
@@ -320,7 +323,7 @@ contract() {
 
     # Download the contract setup script
     print_info "Downloading contract setup script..."
-    curl -L -o /root/contract.sh https://raw.githubusercontent.com/CryptoBuroMaster/UniChain/main/contract/contract.sh
+    curl -L -o /root/contract.sh https://raw.githubusercontent.com/CryptoBureau01/UniChain/main/contract/contract.sh
 
     # Check if the download was successful
     if [[ $? -ne 0 ]]; then
