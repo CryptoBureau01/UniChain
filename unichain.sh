@@ -120,18 +120,6 @@ uni_setup() {
     
     print_info "Allowing necessary ports in the firewall..."
 
-    # Allow port 8548
-    sudo ufw allow 8548/tcp
-    sudo ufw allow 8548/udp
-    sudo ufw allow 8549/tcp
-    sudo ufw allow 8549/udp
-    sudo ufw allow 8546/tcp
-    sudo ufw allow 8546/udp
-    sudo ufw allow 8552/tcp
-    sudo ufw allow 8551/tcp
-    
-    sudo ufw allow 8548
-    sudo ufw allow 8549
     
     # Allow port 30304
     sudo ufw allow 30304
@@ -143,12 +131,6 @@ uni_setup() {
 
     # Update docker-compose.yml to change port 8545 to 8548
     sed -i 's|8545:8545|8548:8545|' docker-compose.yml
-
-    # Update docker-compose.yml to change port 8546 to 8549
-    sed -i 's|8546:8546|8549:8546|' docker-compose.yml
-
-    # Update docker-compose.yml to change port 8551 to 8552
-    sed -i 's|8551:8551|8552:8551|' docker-compose.yml
     
     # Check the status to confirm the rules are added
     if sudo ufw status | grep -q "8548"; then
