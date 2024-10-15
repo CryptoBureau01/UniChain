@@ -130,7 +130,11 @@ uni_setup() {
     sudo ufw allow 8552/tcp
     sudo ufw allow 8551/tcp
     
+    sudo ufw allow 8548
+    sudo ufw allow 8549
+    
     # Allow port 30304
+    sudo ufw allow 30304
     sudo ufw allow 30304/tcp
     sudo ufw allow 30304/udp
 
