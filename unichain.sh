@@ -15,11 +15,157 @@ print_error() {
 
 
 
+
+
+
+update_docker_compose_ports() {
+    # Define the path to your docker-compose.yml file
+    local compose_file="/root/unichain-node/docker-compose.yml"
+    
+    # Check if the file exists
+    if [[ ! -f $compose_file ]]; then
+        print_error "docker-compose.yml file not found at $compose_file"
+        exit 1
+    fi
+
+    # Backup the original file
+    cp "$compose_file" "${compose_file}.bak"
+
+    # Use sed to update the ports section
+    sed -i.bak -E '
+    /^ports:/,/^[^ ]/{ 
+        s/30304:30304\/udp/30304:30304\/udp/
+        s/30304:30304\/tcp/30304:30304\/tcp/
+        s/8545:8545\/tcp/8545:8545\/tcp/
+        s/8546:8546\/tcp/8546:8546\/tcp/
+    }' "$compose_file"
+
+    print_info "Updated ports in $compose_file"
+
+    # Call the uni_menu fuction to display the menu
+    uni_menu
+}
+
+
+
+port_response() {
+    print_info "Checking response from http://localhost:8545..."
+    
+    for i in {1..5}; do  # Loop to check response 5 times
+        response=$(curl -s http://localhost:8545)
+        
+        if [[ -n "$response" ]]; then
+            print_info "Received response from port 8545."
+            return 0  # Break out of the function if response is received
+        else
+            print_error "No response from port 8545. Attempting to allow the port again..."
+            
+            # Allow the port again
+            sudo ufw allow 8545
+            
+            # Check if the port was allowed successfully
+            if sudo ufw status | grep -q "8545"; then
+                print_info "Port 8545 has been allowed in the firewall."
+            else
+                print_error "Failed to allow port 8545."
+                exit 1
+            fi
+
+            # Wait for a few seconds before retrying
+            sleep 2  # Wait for 2 seconds before next check
+        fi
+    done
+    
+    print_error "Failed to receive response from port 8545 after 5 attempts."
+    exit 1
+}
+
+
+port() {
+    print_info "Allowing necessary ports in the firewall..."
+    
+    # Function to attempt allowing ports
+    attempt_port_allow() {
+        sudo ufw allow 30304/tcp
+        sudo ufw allow 30304/udp
+        sudo ufw allow 8545/tcp
+        sudo ufw allow 8545/udp
+        sudo ufw allow 8546/tcp
+        sudo ufw allow 8546/udp
+    }
+    
+    # Loop to try allowing ports up to 5 times
+    for i in {1..5}; do
+        attempt_port_allow
+
+        # Checking if both ports are allowed in the firewall
+        if sudo ufw status | grep -q "30304" && sudo ufw status | grep -q "8545"; then
+            print_info "Ports 30304 and 8545 (TCP/UDP) successfully allowed in the firewall."
+            break
+        else
+            print_error "Attempt $i: Failed to allow necessary ports in the firewall."
+        fi
+
+        # If this is the 5th attempt and it still failed, exit with error
+        if [ "$i" -eq 5 ]; then
+            print_error "Exceeded maximum attempts. Ports were not allowed."
+            exit 1
+        fi
+
+        # Wait for a second before trying again
+        sleep 1
+    done
+
+    # Update port in Docker Services file
+    update_docker_compose_ports
+}
+
+
+
+
+block() {
+    # Check the latest block
+    print_info "Checking the latest block..."
+    
+    # Sending request to check the latest block
+    response=$(curl -s -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' \
+    -H "Content-Type: application/json" http://localhost:8545)
+    
+    # Checking if there's an error in the response
+    if [[ $response == *"\"error\":"* ]]; then
+        print_error "Failed to retrieve the latest block. Check if the node is running correctly."
+        port_response
+        
+        # Check if the node process is running on the system
+        if pgrep -f "geth" > /dev/null; then
+            print_info "The node process is running, but there seems to be an issue with block retrieval."
+        else
+            print_error "Node process is not running. Please start the node."
+            exit 1
+        fi
+        
+    # Checking if the block number is missing or null
+    elif [[ $response == *"null"* ]]; then
+        print_error "No block information available. The node might be syncing or there could be a network issue."
+        docker-compose restart
+
+       sleep 5
+    else
+        print_info "Successfully retrieved the latest block information."
+        echo "$response" | jq .result.number  # Prints the block number
+    fi
+
+    # Call the uni_menu function to display the menu
+    uni_menu
+}
+
+
+
 # Function to install dependencies
 install_dependency() {
     print_info "<=========== Install Dependency ==============>"
     print_info "Updating and upgrading system packages, and installing curl..."
-    sudo apt update && sudo apt upgrade -y && sudo apt install curl -y 
+    sudo apt update && sudo apt upgrade -y && sudo apt install git wget curl -y 
 
     # Check if Docker is already installed
     if ! command -v docker &> /dev/null; then
@@ -115,28 +261,8 @@ uni_setup() {
         exit 1
     fi
 
-
-    print_info "Updating Docker Compose ports to avoid conflict on port 30303..."
-    
-    print_info "Allowing necessary ports in the firewall..."
-
-    
-    # Allow port 30304
-    sudo ufw allow 30304
-    
-    
-    if sudo ufw status | grep -q "30304"; then
-        print_info "Port 30304 allowed in the firewall."
-    else
-        print_error "Failed to allow port 30304."
-        exit 1
-    fi
-
-    
-
-    # Call the uni_menu fuction to display the menu
-    uni_menu
-
+    # Port allow 
+    port
 }
 
 
@@ -152,10 +278,8 @@ uni_run() {
         print_error "Failed to navigate to /root/unichain-node. Check if the directory exists."
         return
     }
-
-    print_info "Setting port 8546 for UniChain..."
-    
-    # Start UniChain on port 8548 using Docker Compose
+ 
+    # Start UniChain on port 8545 using Docker Compose
     docker-compose up -d || {
         print_error "Failed to start UniChain. Check Docker configuration."
         return
@@ -164,19 +288,8 @@ uni_run() {
     # Wait for a few seconds to ensure the node is running
     sleep 5
 
-    # Check the latest block
-    print_info "Checking the latest block..."
-    response=$(curl -d '{"id":1,"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest",false]}' \
-    -H "Content-Type: application/json" http://localhost:8548)
-
-    if [[ $response == *"\"error\":"* ]]; then
-        print_error "Failed to retrieve the latest block. Check if the UniChain node is running correctly."
-    else
-        print_info "Successfully retrieved the latest block information."
-    fi
-
-    # Call the uni_menu function to display the menu
-    uni_menu
+    # block number test
+    block
 }
 
 
