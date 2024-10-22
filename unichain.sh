@@ -279,11 +279,35 @@ uni_run() {
         return
     }
  
+    # Check if the UniChain execution client container is already running
+    if [ "$(docker ps -q -f name=unichain-node-execution-client-1)" ]; then
+        print_info "Stopping and removing existing UniChain execution client container..."
+        docker-compose down || {
+            print_error "Failed to stop the existing UniChain execution client container."
+            return
+        }
+    fi
+
+    # Check if the UniChain op node container is already running
+    if [ "$(docker ps -q -f name=unichain-node-op-node-1)" ]; then
+        print_info "Stopping and removing existing UniChain op node container..."
+        docker stop unichain-node-op-node-1 || {
+            print_error "Failed to stop the existing UniChain op node container."
+            return
+        }
+        docker rm unichain-node-op-node-1 || {
+            print_error "Failed to remove the existing UniChain op node container."
+            return
+        }
+    fi
+
     # Start UniChain on port 8545 using Docker Compose
+    print_info "Starting UniChain on Docker..."
     docker-compose up -d || {
         print_error "Failed to start UniChain. Check Docker configuration."
         return
     }
+
 
     # Wait for a few seconds to ensure the node is running
     sleep 5
