@@ -202,6 +202,8 @@ install_dependency() {
          print_info "Geth is not installed. Installing now..."
     
     # Geth install
+    sudo add-apt-repository -y ppa:ethereum/ethereum
+    sudo apt update
     sudo apt install ethereum -y
     
     print_info "Geth installation complete."
