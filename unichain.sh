@@ -167,34 +167,31 @@ install_dependency() {
     print_info "Updating and upgrading system packages, and installing curl..."
     sudo apt update && sudo apt upgrade -y && sudo apt install git wget curl -y 
 
-    # Check if Docker is already installed
-    if ! command -v docker &> /dev/null; then
-        print_info "Docker is not installed. Installing Docker..."
-        sudo apt install docker.io -y
+    # Check if Docker is install
+    print_info "Installing Docker..."
+    # Download and run the custom Docker installation script
+     wget https://raw.githubusercontent.com/CryptoBureau01/packages/main/docker.sh && chmod +x docker.sh && ./docker.sh
+     # Check for installation errors
+     if [ $? -ne 0 ]; then
+        print_error "Failed to install Docker. Please check your system for issues."
+        exit 1
+     fi
+     # Remove the docker.sh file after installation
+     rm -f docker.sh
 
-        # Check for installation errors
-        if [ $? -ne 0 ]; then
-            print_error "Failed to install Docker. Please check your system for issues."
-            exit 1
-        fi
-    else
-        print_info "Docker is already installed."
+
+    # Docker Composer Setup
+    print_info "Installing Docker Compose..."
+    # Download and run the custom Docker Compose installation script
+    wget https://raw.githubusercontent.com/CryptoBureau01/packages/main/docker-compose.sh && chmod +x docker-compose.sh && ./docker-compose.sh
+    # Check for installation errors
+    if [ $? -ne 0 ]; then
+       print_error "Failed to install Docker Compose. Please check your system for issues."
+       exit 1
     fi
+    # Remove the docker-compose.sh file after installation
+    rm -f docker-compose.sh
 
-    # Check if Docker Compose is already installed
-    if ! command -v docker-compose &> /dev/null; then
-        print_info "Installing Docker Compose..."
-        sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        sudo chmod +x /usr/local/bin/docker-compose
-
-        # Check for installation errors
-        if [ $? -ne 0 ]; then
-            print_error "Failed to install Docker Compose. Please check your system for issues."
-            exit 1
-        fi
-    else
-        print_info "Docker Compose is already installed."
-    fi
 
     # Check if geth is installed, if not, install it
     if ! command -v geth &> /dev/null
