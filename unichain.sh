@@ -36,8 +36,8 @@ update_docker_compose_ports() {
     /^ports:/,/^[^ ]/{ 
         s/30304:30304\/udp/30304:30304\/udp/
         s/30304:30304\/tcp/30304:30304\/tcp/
-        s/8545:8545\/tcp/8545:8545\/tcp/
-        s/8546:8546\/tcp/8546:8546\/tcp/
+        s/8545:8545\/tcp/8548:8545\/tcp/
+        s/8546:8546\/tcp/8549:8546\/tcp/
     }' "$compose_file"
 
     print_info "Updated ports in $compose_file"
