@@ -217,6 +217,11 @@ install_dependency() {
     print_info "Checking Geth version..."
     geth version
 
+    sudo apt install ufw
+    print_info "SSH Allow.."
+    sudo ufw allow ssh
+    print_info "ufw Allow Type y and press Enter to confirm..."
+    sudo ufw enable
 
     # Call the uni_menu function to display the menu
     uni_menu
